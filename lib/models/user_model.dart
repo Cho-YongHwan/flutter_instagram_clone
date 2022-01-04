@@ -1,5 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import 'follow_model.dart';
+
 part 'user_model.g.dart';
 
 @JsonSerializable()
@@ -16,11 +18,12 @@ class User {
   final String? profileImageUrl;
   final String? createdAt;
 
+  final List<Follow> follow;
+
   User({this.id, this.username, this.name, this.email, this.password, this.bio,
-      this.profileImageUrl, this.createdAt});
+      this.profileImageUrl, this.createdAt, required this.follow});
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
-  /// Connect the generated [_$UserToJson] function to the `toJson` method.
   Map<String, dynamic> toJson() => _$UserToJson(this);
 }

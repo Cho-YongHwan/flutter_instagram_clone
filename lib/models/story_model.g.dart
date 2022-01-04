@@ -7,7 +7,7 @@ part of 'story_model.dart';
 // **************************************************************************
 
 Story _$StoryFromJson(Map<String, dynamic> json) => Story(
-      id: json['id'] as String?,
+      id: json['id'] as int?,
       username: json['username'] as String?,
       imageUrl: json['imageUrl'] as String?,
       caption: json['caption'] as String?,

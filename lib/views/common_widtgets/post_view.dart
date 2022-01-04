@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram_clone/service/api/database_service.dart';
+import 'package:instagram_clone/views/comments_screen/comments_screen.dart';
 import 'package:instagram_clone/views/common_widtgets/heart_anime.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -14,7 +15,7 @@ import '../../models/post_model.dart';
 import '../../utils/constants.dart';
 
 class PostView extends StatefulWidget {
-  final String currentUserId;
+  final int currentUserId;
   final Post post;
   final PostStatus postStatus;
 
@@ -67,31 +68,32 @@ class _PostViewState extends State<PostView> {
   }
 
   _likePost() {
-    // if (_isLiked) {
-    //   // Unlike Post
-    //   DatabaseService.unlikePost(
-    //       currentUserId: widget.currentUserId, post: _post);
-    //   setState(() {
-    //     _isLiked = false;
-    //     _likeCount--;
-    //   });
-    // } else {
-    //   // Like Post
-    //   DatabaseService.likePost(
-    //       currentUserId: widget.currentUserId,
-    //       post: _post,
-    //       receiverToken: widget.author.token);
-    //   setState(() {
-    //     _heartAnim = true;
-    //     _isLiked = true;
-    //     _likeCount++;
-    //   });
-    //   Timer(Duration(milliseconds: 350), () {
-    //     setState(() {
-    //       _heartAnim = false;
-    //     });
-    //   });
-    // }
+    if (_isLiked) {
+      // Unlike Post
+      DatabaseService.unlikePost(
+          currentUserId: widget.currentUserId, post: _post);
+      setState(() {
+        _isLiked = false;
+        _likeCount--;
+      });
+    } else {
+      // Like Post
+      DatabaseService.likePost(
+          currentUserId: widget.currentUserId,
+          post: _post,
+          //receiverToken: widget.author.token
+      );
+      setState(() {
+        _heartAnim = true;
+        _isLiked = true;
+        _likeCount++;
+      });
+      Timer(Duration(milliseconds: 350), () {
+        setState(() {
+          _heartAnim = false;
+        });
+      });
+    }
   }
 
   _goToHomeScreen(BuildContext context) {
@@ -333,18 +335,18 @@ class _PostViewState extends State<PostView> {
                         icon: Icon(Ionicons.chatbubble_ellipses_outline),
                         iconSize: 28.0,
                         //TODO 코멘트 스크린 작업해야함
-                        onPressed: () {},
-                        // onPressed: () => Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (_) => CommentsScreen(
-                        //       postStatus: widget.postStatus,
-                        //       post: _post,
-                        //       likeCount: _likeCount,
-                        //       author: widget.author,
-                        //     ),
-                        //   ),
-                        // ),
+                        //onPressed: () {},
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => CommentsScreen(
+                              postStatus: widget.postStatus,
+                              post: _post,
+                              likeCount: _likeCount,
+                              author: _post.user,
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -364,7 +366,7 @@ class _PostViewState extends State<PostView> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
                 child: Text(
-                  '124 Likes',
+                  '$_likeCount Likes',
                   style: TextStyle(
                     fontSize: 16.0,
                     fontWeight: FontWeight.bold,

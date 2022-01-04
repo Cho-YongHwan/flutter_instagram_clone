@@ -8,7 +8,7 @@ part of 'post_model.dart';
 
 Post _$PostFromJson(Map<String, dynamic> json) => Post(
       id: json['id'] as int?,
-      userId: json['userId'] as String?,
+      userId: json['userId'] as int?,
       textcontent: json['textcontent'] as String?,
       createdAt: json['createdAt'] as String?,
       commentsAllowed: json['commentsAllowed'] as bool?,

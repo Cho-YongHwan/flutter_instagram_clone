@@ -1,28 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:instagram_clone/models/user_data.dart';
 import 'package:instagram_clone/views/feed_screen/widget/story_circle.dart';
-
 import 'package:provider/provider.dart';
+
 import '../../../models/story_model.dart';
-import '../../../models/user_data.dart';
 import '../../../models/user_model.dart';
 import '../../../service/api/stories_service.dart';
 import 'blank_story_circle.dart';
 
 class StoriesWidget extends StatefulWidget {
+
   final List<User> users;
-  final Function() goToCameraScreen;
-  final User currentUser;
-  StoriesWidget({Key? key, required this.users, required this.goToCameraScreen, required this.currentUser}) : super(key: key);
+  final Function goToCameraScreen;
+  const StoriesWidget(this.users, this.goToCameraScreen);
 
   @override
   _StoriesWidgetState createState() => _StoriesWidgetState();
 }
 
 class _StoriesWidgetState extends State<StoriesWidget> {
+
   bool _isLoading = false;
   List<User> _followingUsers = [];
   List<Story> _stories = [];
-  User _currentUser = User();
+  User _currentUser = User(follow: []);
   bool _isCurrentUserHasStories = false;
 
   @override
@@ -35,7 +36,7 @@ class _StoriesWidgetState extends State<StoriesWidget> {
     if (!mounted) return;
     setState(() {
       _isLoading = true;
-      _currentUser = widget.currentUser; //Provider.of<UserData>(context, listen: false).currentUser;
+      _currentUser = Provider.of<UserData>(context, listen: false).currentUser;
     });
 
     if (!mounted) return;
@@ -44,7 +45,7 @@ class _StoriesWidgetState extends State<StoriesWidget> {
 
     List<Story> stories = [];
 
-    List<Story>? currentUserStories = await StoriesService.getStoriesByUsername(_currentUser.username.toString(), true);
+    List<Story> currentUserStories = await StoriesService.getStoriesByUserId(_currentUser.id!, true);
 
     if (currentUserStories != null) {
       followingUsersWithStories.add(_currentUser);
@@ -54,17 +55,18 @@ class _StoriesWidgetState extends State<StoriesWidget> {
     }
 
     for (User user in widget.users) {
-      List<Story>? userStories = await StoriesService.getStoriesByUsername(user.username.toString(), true);
+      List<Story> userStories = await StoriesService.getStoriesByUserId(user.id!, true);
+
       if (!mounted) return;
 
       if (userStories != null && userStories.isNotEmpty) {
         followingUsersWithStories.add(user);
-
         for (Story story in userStories) {
           stories.add(story);
         }
       }
     }
+
     if (!mounted) return;
     setState(() {
       _isLoading = false;
@@ -110,11 +112,17 @@ class _StoriesWidgetState extends State<StoriesWidget> {
   }
 
   StoryCircle _buildStoryCircle(int index) {
-    User user = _followingUsers[index];
-    List<Story> userStories = _stories.where((Story story) => story.username == user.username).toList();
+    User? user = _followingUsers[index];
+    List<Story>? userStories = _stories.where((Story story) => story.id == user.id).toList();
+
+    print('------------------------');
+    print(_currentUser.id);
+    print(user);
+    print(userStories);
+    print('------------------------');
 
     return StoryCircle(
-      currentUserId: _currentUser.username.toString(),
+      currentUserId: _currentUser.id!,
       user: user,
       userStories: userStories,
       size: 60,

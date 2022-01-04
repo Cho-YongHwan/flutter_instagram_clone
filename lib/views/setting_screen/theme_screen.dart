@@ -1,11 +1,10 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:instagram_clone/inc/style/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/theme_notifier.dart';
-import '../../utils/themes.dart';
 
 class ThemeScreen extends StatefulWidget {
   @override

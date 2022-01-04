@@ -22,7 +22,7 @@ class BlankStoryCircle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = Provider.of<UserData>(context).currentUser;
-    bool isCurrentUser = currentUser.username == user.username ? true : false;
+    bool isCurrentUser = currentUser.id == user.id ? true : false;
     return Container(
       width: size + 10,
       margin: const EdgeInsets.only(top: 5.0, left: 5.0, right: 5.0),

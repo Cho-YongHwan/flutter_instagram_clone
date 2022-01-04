@@ -6,7 +6,7 @@ part 'media_model.g.dart';
 @JsonSerializable()
 class Media {
   final int? id;
-  final String? postId;
+  final int? postId;
   final String? contentType;
   final String? contentUrl;
 

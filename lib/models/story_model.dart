@@ -4,7 +4,7 @@ part 'story_model.g.dart';
 
 @JsonSerializable()
 class Story {
-  final String? id;
+  final int? id;
   final String? username;
   final String? imageUrl;
   final String? caption;

@@ -8,7 +8,7 @@ import '../../../utils/constants.dart';
 
 class StoryCircle extends StatefulWidget {
   final List<Story> userStories;
-  final String currentUserId;
+  final int currentUserId;
   final User user;
   final double size;
   final bool showUserName;

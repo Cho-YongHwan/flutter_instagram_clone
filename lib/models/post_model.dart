@@ -8,7 +8,7 @@ part 'post_model.g.dart';
 @JsonSerializable()
 class Post {
   final int? id;
-  final String? userId;
+  final int? userId;
   final String? textcontent;
   final String? createdAt;
   final bool? commentsAllowed;
