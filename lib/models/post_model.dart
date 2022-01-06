@@ -16,15 +16,13 @@ class Post {
   final User user;
 
   final List<Media> media;
-  final List<Comment> comment;
+  // final List<Comment> comment;
 
-  Post({this.id, this.userId, this.textcontent, this.createdAt, this.commentsAllowed, required this.user, required this.media, required this.comment});
+  Post({this.id, this.userId, this.textcontent, this.createdAt, this.commentsAllowed, required this.user, required this.media});
 
   factory Post.fromJson(Map<String, dynamic> json) => _$PostFromJson(json);
 
   int get likeCount => media.length;
-
-  get comments => comment.length;
 
   Map<String, dynamic> toJson() => _$PostToJson(this);
 }

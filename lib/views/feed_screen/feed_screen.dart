@@ -13,7 +13,7 @@ import '../../service/api/database_service.dart';
 
 
 class FeedScreen extends StatefulWidget {
-  static final String id = 'feed_screen';
+  static const String id = 'feed_screen';
   final int currentUserId;
   final Function goToDirectMessages;
   final Function goToCameraScreen;
@@ -32,11 +32,6 @@ class _FeedScreenState extends State<FeedScreen> {
   bool _isLoadingStories = false;
   List<User> _followingUsersWithStories = [];
 
-  //
-  // late User _currentUser;
-  // int _currentUserId = 1;
-  // bool _isLoadingFeed = false;
-
   @override
   void initState() {
     // TODO: implement initState
@@ -46,10 +41,8 @@ class _FeedScreenState extends State<FeedScreen> {
 
   _setupFeed() async {
     _setupStories();
-    print('_setupFeed');
 
     setState(() => _isLoadingFeed = true);
-
     List<Post> post = await DatabaseService.getAllFeedPosts();
     //List<Post> post = await DatabaseService.getFeedPosts(widget.currentUserId);
 
@@ -59,17 +52,18 @@ class _FeedScreenState extends State<FeedScreen> {
     });
   }
 
-  void _setupStories() async {
+  _setupStories() async {
     print("_setupStories");
 
     setState(() => _isLoadingStories = true);
-
-    User currentUser =
-        Provider.of<UserData>(context, listen: false).currentUser;
+    // User currentUser =
+    //     Provider.of<UserData>(context, listen: false).currentUser;
+    int currentUserId =
+        Provider.of<UserData>(context, listen: false).currentUserId;
 
     // Get currentUser followingUsers
     List<User> followingUsers =
-    await DatabaseService.getUserFollowingUsers(currentUser.follow);
+    await DatabaseService.getUserFollowingUsers(currentUserId);
 
     if (!mounted) return;
 
@@ -151,11 +145,11 @@ class _FeedScreenState extends State<FeedScreen> {
                   ListView.builder(
                     physics: NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
-                    itemCount: _posts.length > 0 ? _posts.length : 1,
+                    itemCount: _posts.isNotEmpty ? _posts.length : 1,
                     itemBuilder: (BuildContext context, int index) {
-                      if (_posts.length == 0) {
+                      if (_posts.isEmpty) {
                         //If there is no posts
-                        return Container(
+                        return SizedBox(
                           height: MediaQuery.of(context).size.height,
                           child: Center(
                             child:
@@ -166,10 +160,23 @@ class _FeedScreenState extends State<FeedScreen> {
 
                       Post post = _posts[index];
 
-                      return PostView(
-                        postStatus: PostStatus.feedPost,
-                        currentUserId: widget.currentUserId,
-                        post: post,
+                      return FutureBuilder(
+                        future: DatabaseService.getUserWithId(post.userId!),
+                        builder:
+                            (BuildContext context, AsyncSnapshot snapshot) {
+                          if (!snapshot.hasData) {
+                            return SizedBox.shrink();
+                          }
+
+                          User author = snapshot.data;
+
+                          return PostView(
+                            postStatus: PostStatus.feedPost,
+                            currentUserId: widget.currentUserId,
+                            author: author,
+                            post: post,
+                          );
+                        },
                       );
                     },
                   ),

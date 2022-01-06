@@ -23,7 +23,7 @@ class _StoriesWidgetState extends State<StoriesWidget> {
   bool _isLoading = false;
   List<User> _followingUsers = [];
   List<Story> _stories = [];
-  User _currentUser = User(follow: []);
+  User _currentUser = User();
   bool _isCurrentUserHasStories = false;
 
   @override
@@ -114,12 +114,6 @@ class _StoriesWidgetState extends State<StoriesWidget> {
   StoryCircle _buildStoryCircle(int index) {
     User? user = _followingUsers[index];
     List<Story>? userStories = _stories.where((Story story) => story.id == user.id).toList();
-
-    print('------------------------');
-    print(_currentUser.id);
-    print(user);
-    print(userStories);
-    print('------------------------');
 
     return StoryCircle(
       currentUserId: _currentUser.id!,

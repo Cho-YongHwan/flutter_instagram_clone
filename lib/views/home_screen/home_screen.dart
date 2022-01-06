@@ -171,11 +171,11 @@ class _HomeScreenState extends State<HomeScreen> {
         //currentUser: _currentUser,
       ),
       ProfileScreen(
-        // goToCameraScreen: _goToCameraScreen,
-        // isCameFromBottomNavigation: true,
-        // onProfileEdited: _getCurrentUser,
-        // userId: widget.currentUserId,
-        // currentUserId: widget.currentUserId,
+        goToCameraScreen: _goToCameraScreen,
+        isCameFromBottomNavigation: true,
+        onProfileEdited: _getCurrentUser,
+        userId: widget.currentUserId,
+        currentUserId: widget.currentUserId,
       ),
     ];
 

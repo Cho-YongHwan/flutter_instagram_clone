@@ -4,12 +4,13 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:instagram_clone/models/user_model.dart';
 import 'package:instagram_clone/service/api/database_service.dart';
+import 'package:instagram_clone/utils/custom_navigation.dart';
 import 'package:instagram_clone/views/comments_screen/comments_screen.dart';
 import 'package:instagram_clone/views/common_widtgets/heart_anime.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:timeago/timeago.dart' as timeago;
-
 import '../../inc/style/theme.dart';
 import '../../models/post_model.dart';
 import '../../utils/constants.dart';
@@ -18,9 +19,10 @@ class PostView extends StatefulWidget {
   final int currentUserId;
   final Post post;
   final PostStatus postStatus;
+  final User author;
 
   PostView(
-      {required this.currentUserId, required this.post, required this.postStatus});
+      {Key? key, required this.currentUserId, required this.post, required this.author, required this.postStatus}) : super(key: key);
 
   @override
   _PostViewState createState() => _PostViewState();
@@ -47,13 +49,12 @@ class _PostViewState extends State<PostView> {
     //   _likeCount = widget.post.likeCount;
     // }
   }
-
   _goToUserProfile(BuildContext context, Post post) {
-    // CustomNavigation.navigateToUserProfile(
-    //     context: context,
-    //     currentUserId: widget.currentUserId,
-    //     userId: post.authorId,
-    //     isCameFromBottomNavigation: false);
+    CustomNavigation.navigateToUserProfile(
+        context: context,
+        currentUserId: widget.currentUserId,
+        userId: post.userId,
+        isCameFromBottomNavigation: false);
   }
 
   _initPostLiked() async {
@@ -261,6 +262,7 @@ class _PostViewState extends State<PostView> {
 
   @override
   Widget build(BuildContext context) {
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
@@ -270,10 +272,9 @@ class _PostViewState extends State<PostView> {
               onTap: () => _goToUserProfile(context, _post),
               child: CircleAvatar(
                 backgroundColor: Colors.grey,
-                backgroundImage:
-                _post.user.profileImageUrl!.isEmpty
+                backgroundImage: widget.author.profileImageUrl!.isEmpty
                     ? AssetImage(placeHolderImageRef)
-                    : CachedNetworkImageProvider(_post.user.profileImageUrl.toString()) as ImageProvider,
+                    : CachedNetworkImageProvider(widget.author.profileImageUrl.toString()) as ImageProvider,
               ),
             ),
             title: GestureDetector(
@@ -281,7 +282,7 @@ class _PostViewState extends State<PostView> {
               child: Row(
                 children: [
                   Text(
-                    _post.user.name.toString(),
+                    widget.author.name.toString(),
                     style: kFontSize18FontWeight600TextStyle,
                   ),
                   //TODO UserBadges 분석후에 수정
@@ -321,11 +322,11 @@ class _PostViewState extends State<PostView> {
                       IconButton(
                         icon: _isLiked
                             ? Icon(
-                                Ionicons.heart_outline,
-                                size: 36,
+                                Ionicons.heart,
+                                size: 30,
                                 color: Colors.red,
                             )
-                            : Icon(Ionicons.heart_outline, size: 36),
+                            : Icon(Ionicons.heart_outline, size: 30),
                         iconSize: 30.0,
                         onPressed: widget.postStatus == PostStatus.feedPost
                             ? _likePost
@@ -334,8 +335,6 @@ class _PostViewState extends State<PostView> {
                       IconButton(
                         icon: Icon(Ionicons.chatbubble_ellipses_outline),
                         iconSize: 28.0,
-                        //TODO 코멘트 스크린 작업해야함
-                        //onPressed: () {},
                         onPressed: () => Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -386,7 +385,7 @@ class _PostViewState extends State<PostView> {
                       child: Row(
                         children: [
                           Text(
-                            _post.user.username.toString(),
+                            widget.author.username.toString(),
                             style: TextStyle(
                                 fontSize: 16.0, fontWeight: FontWeight.bold),
                           ),
@@ -411,7 +410,10 @@ class _PostViewState extends State<PostView> {
                 padding:
                 const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                 child: Text(
-                  _post.createdAt.toString(),
+                  timeago.format(DateTime.parse(_post.createdAt.toString()), locale: 'ko'),
+                  // timeago.format(DataFoo,locale: 'en_chort')
+                  // timeago.setLocaleMessages('ar', timeago.ArMessages());
+                  //_post.createdAt.toString(),
                   style: TextStyle(
                     color: Colors.grey,
                     fontSize: 12.0,

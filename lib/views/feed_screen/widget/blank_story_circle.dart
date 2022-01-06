@@ -13,12 +13,13 @@ class BlankStoryCircle extends StatelessWidget {
   final double size;
   final bool showUserName;
 
-  BlankStoryCircle({
+  BlankStoryCircle({Key? key,
     required this.user,
     required this.goToCameraScreen,
     this.size = 60,
     this.showUserName = true,
-  });
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final currentUser = Provider.of<UserData>(context).currentUser;

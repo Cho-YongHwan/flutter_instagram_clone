@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 
 final darkTheme = ThemeData(
+  // 로딩바 설정
+  progressIndicatorTheme: ProgressIndicatorThemeData(
+    color: const Color(0xFFE7E7E7),
+    circularTrackColor: const Color(0xFFF5F5F5),
+    linearTrackColor: const Color(0xFFF1F1F1),
+  ),
   primaryColor: Colors.black,
   brightness: Brightness.dark,
   backgroundColor: Colors.black,
@@ -33,6 +39,11 @@ final darkTheme = ThemeData(
 );
 
 final lightTheme = ThemeData(
+  progressIndicatorTheme: ProgressIndicatorThemeData(
+    color: const Color(0xFFE7E7E7),
+    circularTrackColor: const Color(0xFFF5F5F5),
+    linearTrackColor: const Color(0xFFF1F1F1),
+  ),
   primaryColor: Colors.white,
   brightness: Brightness.light,
   backgroundColor: Colors.white,

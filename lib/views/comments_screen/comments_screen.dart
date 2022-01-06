@@ -38,14 +38,35 @@ _goToUserProfile(BuildContext context, Comment comment, int currentUserId) {
 }
 
 class _CommentsScreenState extends State<CommentsScreen> {
+
   final TextEditingController _commentController = TextEditingController();
   bool _isCommenting = false;
 
   final StreamController<List<Comment>> _streamController = StreamController<List<Comment>>();
+
   Timer? _timer;
 
   Future getComment() async {
     var response = await http.get(Uri.parse('http://localhost:3000/api/post/comment/${widget.post.id}'));
+
+    List<Comment> _commnets = [];
+
+    if (response.statusCode == 200) {
+      if (response.body.isNotEmpty) {
+        var converted = json.decode(utf8.decode(response.bodyBytes));
+        for (var data in converted['list']['content']) {
+          Comment comment = Comment.fromJson(data);
+          _commnets.add(comment);
+        }
+      }
+    } else {
+      throw Exception('Failed to GetUserWithId');
+    }
+    _streamController.add(_commnets);
+  }
+
+  Future moerComment() async {
+    var response = await http.get(Uri.parse('http://localhost:3000/api/post/comment/${widget.post.id}?page=1'));
 
     List<Comment> _commnets = [];
 
@@ -76,22 +97,52 @@ class _CommentsScreenState extends State<CommentsScreen> {
   void dispose() {
     //cancel the timer
     if (_timer!.isActive) _timer!.cancel();
-
     super.dispose();
   }
 
-  _buildComment(Comment comment, int currentUserId) {
-    return FutureBuilder(
-      future: DatabaseService.getUserWithId(comment.userId!),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        if (!snapshot.hasData) {
-          return SizedBox.shrink();
-        }
-        User author = snapshot.data;
+  List<User> _commentUserList = [];
 
-        return _buildListTile(context, author, comment, currentUserId);
-      },
-    );
+  _buildComment(Comment comment, int currentUserId) {
+
+    bool _isGetUserWithId = true;
+
+    User _user = User();
+    for (User data in _commentUserList) {
+      if (data.id == comment.userId) {
+        _isGetUserWithId = false;
+        _user = data;
+        break;
+      }
+    }
+
+    return !_isGetUserWithId
+      ? FutureBuilder(
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            return _buildListTile(context, _user, comment, currentUserId);
+        }
+      )
+      : FutureBuilder(
+          future: DatabaseService.getUserWithId(comment.userId!),
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            if (!snapshot.hasData) {
+              return SizedBox.shrink();
+            }
+
+            bool _isAddUserList = true;
+            User author = snapshot.data;
+
+            for (User data in _commentUserList) {
+              if (data.id == author.id) {
+                _isAddUserList = false;
+                break;
+              }
+            }
+
+            if (_isAddUserList) _commentUserList.add(author);
+
+            return _buildListTile(context, author, comment, currentUserId);
+          },
+      );
   }
 
   _buildListTile(BuildContext context, User author, Comment comment,
@@ -128,7 +179,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
           SizedBox(
             height: 6.0,
           ),
-          Text(comment.createdAt.toString()),
+          Text(timeago.format(DateTime.parse(comment.createdAt.toString()), locale: 'ko')),
         ],
       ),
     );
@@ -154,7 +205,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
     return IconTheme(
       data: IconThemeData(
         color: _isCommenting
-            ? Theme.of(context).accentColor
+            ? Theme.of(context).colorScheme.secondary
             : Theme.of(context).disabledColor,
       ),
       child: Container(
@@ -208,6 +259,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
                             currentUserId: currentUserId,
                             post: widget.post,
                             comment: _commentController.text,
+                            getComment: getComment
                             //recieverToken: widget.author.token,
                           );
                           _commentController.clear();
@@ -227,9 +279,6 @@ class _CommentsScreenState extends State<CommentsScreen> {
 
   @override
   Widget build(BuildContext context) {
-
-    print(context);
-
     final int currentUserId =
         Provider.of<UserData>(context, listen: false).currentUserId;
 
@@ -274,6 +323,11 @@ class _CommentsScreenState extends State<CommentsScreen> {
                     ),
                   );
                 },
+              ),
+              SizedBox(
+                child: TextButton(onPressed: () {
+                  moerComment();
+                }, child: Text('더보기'))
               ),
               Divider(
                 height: 1.0,

@@ -18,10 +18,10 @@ class User {
   final String? profileImageUrl;
   final String? createdAt;
 
-  final List<Follow> follow;
+  // final List<Follow> follow;
 
   User({this.id, this.username, this.name, this.email, this.password, this.bio,
-      this.profileImageUrl, this.createdAt, required this.follow});
+      this.profileImageUrl, this.createdAt});
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 

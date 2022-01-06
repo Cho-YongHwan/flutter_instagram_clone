@@ -16,9 +16,6 @@ Post _$PostFromJson(Map<String, dynamic> json) => Post(
       media: (json['media'] as List<dynamic>)
           .map((e) => Media.fromJson(e as Map<String, dynamic>))
           .toList(),
-      comment: (json['comment'] as List<dynamic>)
-          .map((e) => Comment.fromJson(e as Map<String, dynamic>))
-          .toList(),
     );
 
 Map<String, dynamic> _$PostToJson(Post instance) => <String, dynamic>{
@@ -29,5 +26,4 @@ Map<String, dynamic> _$PostToJson(Post instance) => <String, dynamic>{
       'commentsAllowed': instance.commentsAllowed,
       'user': instance.user,
       'media': instance.media,
-      'comment': instance.comment,
     };

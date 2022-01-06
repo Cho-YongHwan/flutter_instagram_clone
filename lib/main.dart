@@ -9,8 +9,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'models/theme_notifier.dart';
 import 'models/user_data.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 void main() {
+
+  timeago.setLocaleMessages('ko', timeago.KoMessages());
 
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferences.getInstance().then((prefs) {

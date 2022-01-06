@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:instagram_clone/models/follow_model.dart';
 import 'package:instagram_clone/models/post_model.dart';
 
 import '../../models/user_model.dart';
@@ -12,7 +11,7 @@ class DatabaseService {
 
     bool result = false;
 
-    Map data = {"userId": currentUserId, "targetId": postId};
+    Map data = {"userId": currentUserId, "targetId": postId, "targetType": 1};
 
     var body = json.encode(data);
     http.Response response = await http.post(
@@ -22,13 +21,10 @@ class DatabaseService {
     );
 
     if (response.statusCode == 200) {
-      if (response.body.isNotEmpty) {
-        result = true;
-      } else {
-        result = false;
-      }
+      var converted =json.decode(response.body);
+      if (converted['likes'] != null) result = true;
     } else {
-      throw Exception('commentOnPost Failed!!..');
+      throw Exception('didLikePost Failed!!..');
     }
 
     return result;
@@ -53,7 +49,7 @@ class DatabaseService {
       //   result = false;
       // }
     } else {
-      throw Exception('commentOnPost Failed!!..');
+      throw Exception('likePost Failed!!..');
     }
 
     // addActivityItem(
@@ -69,9 +65,9 @@ class DatabaseService {
     // );
   }
 
-  static void unlikePost({required int currentUserId, required Post post}) async {
+  static void unlikePost({int? currentUserId, Post? post}) async {
 
-    Map data = {"userId": currentUserId, "targetId": post.id, "targetType": 1};
+    Map data = {"userId": currentUserId, "targetId": post!.id, "targetType": 1};
 
     var body = json.encode(data);
     http.Response response = await http.post(
@@ -87,7 +83,7 @@ class DatabaseService {
       //   result = false;
       // }
     } else {
-      throw Exception('commentOnPost Failed!!..');
+      throw Exception('unlikePost Failed!!..');
     }
 
 
@@ -114,7 +110,7 @@ class DatabaseService {
     } else {
       throw Exception('Failed to GetUserWithId');
     }
-    return User(follow: []);
+    return User();
   }
 
   static Future<List<Post>> getFeedPosts(int userId) async {
@@ -157,17 +153,96 @@ class DatabaseService {
 
   }
 
-  static Future<List<User>> getUserFollowingUsers(List<Follow>? follows) async {
+  static void unfollowUser({int? userId, int? followingId}) async {
+    Map data = {"userId": userId, "followingId": followingId};
+
+    var body = json.encode(data);
+    http.Response response = await http.post(
+        Uri.parse('http://localhost:3000/api/follow/unfollowUser'),
+        headers: {"Content-Type": "application/json"},
+        body: body
+    );
+  }
+
+  static void followUser({int? userId, int? followingId}) async {
+    Map data = {"userId": userId, "followingId": followingId};
+
+    var body = json.encode(data);
+    http.Response response = await http.post(
+        Uri.parse('http://localhost:3000/api/follow/followUser'),
+        headers: {"Content-Type": "application/json"},
+        body: body
+    );
+
+  }
+
+  static Future<bool> isFollowingUser({int? userId, int? followingId}) async {
+
+    print('isFollowingUser');
+
+    Map data = {"userId": userId, "followingId": followingId};
+
+    var body = json.encode(data);
+    http.Response response = await http.post(
+        Uri.parse('http://localhost:3000/api/follow/isFollowingUser'),
+        headers: {"Content-Type": "application/json"},
+        body: body
+    );
+    return response.body == 'true' ? true : false;
+  }
+
+  static Future<List> getUserFollowingIds(int userId) async {
+    var response = await http.get(Uri.parse('http://localhost:3000/api/follow/getUserFollowingList/${userId}'));
+    List followingIds = [];
+
+    if (response.statusCode == 200) {
+      if (response.body.isNotEmpty) {
+        var converted = json.decode(utf8.decode(response.bodyBytes));
+        for (var data in converted) {
+          followingIds.add(data['followingId']);
+        }
+      }
+    } else {
+      throw Exception('Failed to getUserFollowingIds');
+    }
+    return followingIds;
+  }
+
+  static Future<List> getUserFollowersIds(int userId) async {
+    var response = await http.get(Uri.parse('http://localhost:3000/api/follow/getUserFollowerList/${userId}'));
+    List followerIds = [];
+
+    if (response.statusCode == 200) {
+      if (response.body.isNotEmpty) {
+        var converted = json.decode(utf8.decode(response.bodyBytes));
+        for (var data in converted) {
+          followerIds.add(data['userId']);
+        }
+      }
+    } else {
+      throw Exception('Failed to getUserFollowersIds');
+    }
+    return followerIds;
+  }
+
+  static Future<List<User>> getUserFollowingUsers(int userId) async {
+    var response = await http.get(Uri.parse('http://localhost:3000/api/follow/getUserFollowingList/${userId}'));
     List<User> followingUsers = [];
 
-    for (var data in follows!) {
-      User user = await getUserWithId(data.followingId!);
-      followingUsers.add(user);
+    if (response.statusCode == 200) {
+      if (response.body.isNotEmpty) {
+        var converted = json.decode(utf8.decode(response.bodyBytes));
+        for (var data in converted) {
+          followingUsers.add(User.fromJson(data['user']));
+        }
+      }
+    } else {
+      throw Exception('Failed to getUserFollowingUsers');
     }
     return followingUsers;
   }
 
-  static void commentOnPost({required int currentUserId, required Post post, required String comment}) async {
+  static void commentOnPost({required int currentUserId, required Post post, required String comment, getComment}) async {
 
     Map data = {"userId": currentUserId, "postId": post.id, "content" : comment};
 
@@ -180,11 +255,44 @@ class DatabaseService {
 
     if (response.statusCode == 200) {
       print('commentOnPost success!!..');
+
+      getComment();
+
     } else {
       throw Exception('commentOnPost Failed!!..');
     }
 
   }
+
+  static Future<int> numFollowers(int userId) async {
+    var response = await http.get(Uri.parse('http://localhost:3000/api/follow/getNumFollowers/${userId}'));
+    if (response.statusCode == 200) {
+      if (response.body.isNotEmpty) {
+        var converted = json.decode(utf8.decode(response.bodyBytes));
+        return converted['count'];
+      }
+    } else {
+      throw Exception('Failed to GetUserWithId');
+    }
+    return 0;
+  }
+
+  static Future<int> numFollowing(int userId) async {
+    var response = await http.get(Uri.parse('http://localhost:3000/api/follow/getNumFollowing/${userId}'));
+    if (response.statusCode == 200) {
+      if (response.body.isNotEmpty) {
+        var converted = json.decode(utf8.decode(response.bodyBytes));
+        return converted['count'];
+        //return
+      }
+    } else {
+      throw Exception('Failed to GetUserWithId');
+    }
+    return 0;
+  }
+
+
+
   //
   // static Future<List<String>> getUserFollowingIds(String username) async {
   //

@@ -6,20 +6,20 @@ import 'package:instagram_clone/views/profile_screen/profile_screen.dart';
 
 class CustomNavigation {
   static void navigateToUserProfile({
-    required BuildContext context,
-    required bool isCameFromBottomNavigation,
-    required int currentUserId,
-    required int userId,
+    BuildContext? context,
+    bool? isCameFromBottomNavigation,
+    int? currentUserId,
+    int? userId,
   }) {
     Navigator.push(
-      context,
+      context!,
       MaterialPageRoute(
         builder: (_) => ProfileScreen(
-          // isCameFromBottomNavigation: isCameFromBottomNavigation,
-          // currentUserId: currentUserId,
-          // userId: userId,
-          // goToCameraScreen: () =>
-          //     navigateToHomeScreen(context, currentUserId, initialPage: 0),
+          isCameFromBottomNavigation: isCameFromBottomNavigation!,
+          currentUserId: currentUserId!,
+          userId: userId!,
+          onProfileEdited: () {},
+          goToCameraScreen: () => navigateToHomeScreen(context, currentUserId, initialPage: 0),
         ),
       ),
     );
